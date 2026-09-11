@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#191611">
+<title>Maupo Aeuko Poc</title>
+<style>
+:root{color-scheme:dark;--paper:#d0bd95;--ink:#191611}*{box-sizing:border-box}body{margin:0;background:#080807;color:var(--paper);font-family:Georgia,'Times New Roman',serif;overflow:hidden}#stage{position:absolute;inset:0;margin:auto;aspect-ratio:16/9;max-width:100vw;max-height:100dvh;width:min(100vw,177.777dvh);overflow:hidden;background:var(--ink)}canvas{width:100%;height:100%;display:block}button,select,input{font:inherit}button{cursor:pointer;color:inherit;background:transparent;border:1px solid #bba883;border-radius:2% 5% 1% 4%;padding:.55em 1.1em;box-shadow:2px 2px 0 #766647,-1px -1px 0 #4d4435;transition:color .16s,box-shadow .16s}button:hover,button:focus-visible{color:#fff9ea;box-shadow:0 0 13px #fff5,2px 2px 0 #cbb996;outline:1px solid #eee0c8}button:active{transform:translateY(2px)}.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;background:#15120fef;text-align:center;overflow:auto}.overlay[hidden],[hidden]{display:none!important}h1,h2,p{margin:.25em 0}h1{font-size:clamp(26px,5vw,64px);font-weight:normal;letter-spacing:-.055em;text-shadow:2px 1px #6d5a3d}h2{font-size:clamp(23px,3vw,38px);font-weight:normal}p{line-height:1.5}.small{font-size:clamp(10px,1.3vw,15px);opacity:.75}.row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}#menu{background:transparent;align-items:flex-start;text-align:left;padding-left:8%;pointer-events:none}#menu>*{pointer-events:auto;max-width:49%}#menu nav{display:flex;flex-direction:column;gap:16px;width:23%;margin-top:18px}#menu nav button{font-size:clamp(16px,2.6vw,30px);transform:rotate(-1deg)}#menu .note{margin-top:22px}label{display:flex;justify-content:space-between;align-items:center;gap:22px;max-width:480px;width:90%}select{background:#292319;color:var(--paper);border:1px solid #897856;padding:7px;max-width:62%}input{accent-color:#bda57b}#hud{position:absolute;top:4%;left:4%;right:4%;display:flex;justify-content:space-between;align-items:start;pointer-events:none;text-shadow:1px 2px #000}#hud button{pointer-events:auto;font-size:14px}#distance{font-size:clamp(18px,2.4vw,28px)}#biome{font-size:clamp(10px,1.4vw,16px)}#caption{position:absolute;bottom:9%;left:12%;right:12%;text-align:center;font-size:clamp(16px,2.4vw,28px);text-shadow:2px 2px 3px #000;background:#1118;padding:8px;pointer-events:none}#skip{position:absolute;top:5%;right:4%;font-size:13px}#touch{position:absolute;bottom:3%;left:3%;right:3%;display:flex;justify-content:space-between;pointer-events:none}#touch .row{gap:9px}#touch button{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;background:#17130fbf;width:52px;height:48px;padding:3px}#answers{display:flex;flex-direction:column;gap:12px;min-width:220px;max-width:90%}#question{max-width:580px}#status{position:absolute;bottom:2%;left:5%;right:5%;text-align:center;font-size:13px;pointer-events:none}#settings{gap:16px}#settings p{max-width:510px}@media(max-height:450px){.overlay{gap:6px;padding:8px}#settings{gap:7px}#menu nav{gap:9px;margin-top:8px}#menu .note{margin-top:8px}button{padding:.35em .8em}#touch button{width:43px;height:38px}}@media(prefers-reduced-motion:reduce){button{transition:none}}
+</style>
+</head>
+<body>
+<main id="stage" aria-label="Maupo Aeuko Poc">
+<canvas id="world" width="960" height="540" aria-label="Hand-drawn horror platformer. Use A and D or arrow keys to move, Space to jump, Shift to dash, and Escape to pause."></canvas>
+<section id="menu" class="overlay">
+<h1>Headache</h1><p class="small">by Maupo Aeuko Poc</p>
+<nav aria-label="Main menu"><button id="run">Run</button><button id="breathe">Breathe</button><button id="exit">Die</button></nav>
+<p class="small note">Nothing outside the glass is real.<br>Nothing inside it is kind.</p>
+<p class="small">Fictional psychological horror · violence · flashing imagery.<br>Reduced motion and flashes are available in Breathe.</p>
+</section>
+<section id="settings" class="overlay" hidden aria-labelledby="settingsTitle">
+<h2 id="settingsTitle">Breathe</h2>
+<label>Resolution<select id="resolution"><option value="0.75">720 × 405</option><option value="1">960 × 540</option><option value="1.5">1440 × 810</option><option value="2">1920 × 1080</option></select></label>
+<label>Difficulty<select id="difficulty"><option value="easy">Dream</option><option value="normal">Nightmare</option><option value="hard">Schizophrenia</option></select></label>
+<label>Quiet the room<input id="mute" type="checkbox"></label>
+<label>Reduce motion & flashes<input id="reduced" type="checkbox"></label>
+<div class="row"><button id="fullscreen">Toggle fullscreen</button><button id="settingsBack">Back</button></div>
+<p class="small">Difficulty applies to the next run. These fictional difficulty names are not clinical representations of mental illness.</p>
+</section>
+<div id="hud" hidden><div><div id="distance">0 m</div><div id="biome"></div></div><button id="pauseButton">Breathe / Esc</button></div>
+<div id="caption" hidden aria-live="polite"></div><button id="skip" hidden>Skip scene</button>
+<section id="paused" class="overlay" hidden><h2>Hold your breath.</h2><p class="small">A / D or ← / → — move · Space / W / ↑ — jump twice<br>Shift / X — dash · Esc — pause</p><button id="resume">Keep running</button><button id="pauseSettings">Breathe</button><button id="quit">Return to the glass</button></section>
+<section id="riddle" class="overlay" hidden aria-labelledby="question"><p class="small">THE KEEPER OF WHAT YOU LEFT BEHIND</p><h2 id="question"></h2><p id="clue" class="small"></p><div id="answers"></div><p class="small">Choose carefully. The room is listening.</p></section>
+<section id="dead" class="overlay" hidden><h2>You never left.</h2><p id="deathText"></p><p id="record" class="small"></p><button id="retry">Run again</button><button id="deadMenu">Return to the glass</button></section>
+<section id="exited" class="overlay" hidden><h2>The glass is still here.</h2><p>You can close this tab now.</p><button id="return">Stay a little longer</button></section>
+<div id="touch" hidden><div class="row"><button data-key="ArrowLeft" aria-label="Move left">←</button><button data-key="ArrowRight" aria-label="Move right">→</button></div><div class="row"><button data-key="ShiftLeft" aria-label="Dash">Dash</button><button data-key="Space" aria-label="Jump">Jump</button></div></div>
+<p id="status" role="status"></p>
+</main>
+<script>
+'use strict';
+(()=>{
+const $=id=>document.getElementById(id),canvas=$('world'),ctx=canvas.getContext('2d');
+if(!ctx){$('status').textContent='This browser cannot render Canvas. Try a current browser.';return;}
+const W=960,H=540,GOAL=50000,METER=10,STEP=1/120;
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),lerp=(a,b,t)=>a+(b-a)*t;
+const media=window.matchMedia('(prefers-reduced-motion: reduce)');
+let options={resolution:1,difficulty:'normal',mute:false,reduced:media.matches},best=0;
+try{const saved=JSON.parse(localStorage.getItem('snow-globe-settings')||'null');if(saved){if([.75,1,1.5,2].includes(saved.resolution))options.resolution=saved.resolution;if(['easy','normal','hard'].includes(saved.difficulty))options.difficulty=saved.difficulty;for(const k of ['mute','reduced'])if(typeof saved[k]==='boolean')options[k]=saved[k];}best=Math.max(0,Number(localStorage.getItem('snow-globe-best'))||0);}catch{}
+function save(){try{localStorage.setItem('snow-globe-settings',JSON.stringify(options));localStorage.setItem('snow-globe-best',String(best));}catch{}}
+function resize(){canvas.width=Math.round(W*options.resolution);canvas.height=Math.round(H*options.resolution);}
+resize();
+let state='menu',settingsOrigin='menu',clock=0,sceneTime=0,acc=0,previous=0,cam=0,run=null,shake=0,activeGate=null,announcementUntil=0;
+const keys=new Set(),held=new Map();let jumpQueue=0,dashQueue=0;
+const panels=['menu','settings','paused','riddle','dead','exited'];
+function clearInput(){keys.clear();held.clear();jumpQueue=0;dashQueue=0;}
+function setState(next){state=next;clearInput();acc=0;for(const p of panels)$(p).hidden=p!==next;$('hud').hidden=next!=='play';$('touch').hidden=next!=='play'||!matchMedia('(pointer:coarse)').matches;$('skip').hidden=!['intro','ending'].includes(next);$('caption').hidden=!['intro','ending'].includes(next);if(!['intro','ending'].includes(next))$('caption').textContent='';const focus=$(next)?.querySelector('button,select');if(focus)focus.focus({preventScroll:true});}
+function notify(text){$('status').textContent=text;announcementUntil=clock+5;}
+// Audio is synthesized locally and starts only after a player gesture.
+let audio=null,master=null;
+function unlockAudio(){if(options.mute)return;try{if(!audio){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audio=new AC();master=audio.createGain();master.gain.value=.16;master.connect(audio.destination);for(const hz of [43,64.5]){const osc=audio.createOscillator(),g=audio.createGain();osc.type='sine';osc.frequency.value=hz;g.gain.value=.12;osc.connect(g).connect(master);osc.start();}}if(audio.state==='suspended')audio.resume().catch(()=>{});}catch{}}
+function tone(hz,duration=.12,type='sine',volume=.2){if(!audio||options.mute||audio.state!=='running')return;const o=audio.createOscillator(),g=audio.createGain(),now=audio.currentTime;o.type=type;o.frequency.setValueAtTime(hz,now);o.frequency.exponentialRampToValueAtTime(Math.max(18,hz*.5),now+duration);g.gain.setValueAtTime(volume,now);g.gain.exponentialRampToValueAtTime(.001,now+duration);o.connect(g).connect(master);o.start();o.stop(now+duration+.02);o.onended=()=>{o.disconnect();g.disconnect();};}
+function seedRandom(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function newSeed(){if(window.crypto?.getRandomValues)return crypto.getRandomValues(new Uint32Array(1))[0];return(Date.now()^Math.floor(Math.random()*0xffffffff))>>>0;}
+// A cached, deterministic paper texture keeps the ink grain stable and inexpensive.
+const grain=document.createElement('canvas');grain.width=W;grain.height=H;
+const gc=grain.getContext('2d'),gr=seedRandom(1937);
+for(let i=0;i<14500;i++){gc.fillStyle=i%3?'#110d0820':'#eddbb118';const x=gr()*W,y=gr()*H;gc.fillRect(x,y,gr()*2+.4,gr()*1.2+.3);}
+const ink='#17130f',paper='#c5b08a';
+function path(points,color=ink,width=2){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.stroke();}
+function ellipse(x,y,rx,ry,fill=paper,stroke=ink){ctx.beginPath();ctx.ellipse(x,y,Math.max(.1,rx),Math.max(.1,ry),0,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}}
+function roughRect(x,y,w,h,fill=paper){ctx.fillStyle=fill;ctx.fillRect(x,y,w,h);path([[x-2,y+2],[x+w+1,y-1],[x+w,y+h+2],[x+1,y+h],[x-2,y+2]]);path([[x+2,y-2],[x+w-2,y+2],[x+w+2,y+h-1]],'#28201488',1);}
+function hatch(x,y,w,h,spacing=10,color='#21190e55'){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();for(let n=-h;n<w+h;n+=spacing){path([[x+n,y],[x+n+h,y+h]],color,1);path([[x+n,y+h],[x+n+h,y]],color,.65);}ctx.restore();}
+function text(s,x,y,size=20,color=paper,align='center'){ctx.fillStyle=color;ctx.font=`${size}px Georgia`;ctx.textAlign=align;ctx.fillText(s,x,y);}
+// Shared illustrated actor: terrified rolled sleeves / top hat, smirk, ember.
+function man(x,y,scale=1,smug=false,pose=0,t=clock){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.rotate(pose);
+ctx.fillStyle=smug?'#272119':'#a39373';ctx.beginPath();ctx.moveTo(-47,112);ctx.lineTo(-42,42);ctx.lineTo(-19,23);ctx.lineTo(19,23);ctx.lineTo(43,43);ctx.lineTo(50,112);ctx.closePath();ctx.fill();hatch(-41,38,82,72,7);path([[-42,103],[-39,43],[-16,25],[0,43],[17,25],[41,44],[48,104]]);
+path([[-16,32],[-8,60],[0,43],[9,62],[17,32]],ink,2);path([[0,47],[2,109]],ink,2);
+for(const side of [-1,1]){roughRect(side<0?-51:32,67,20,14,'#ad9b7c');path([[side*45,81],[side*49,108]],paper,10);path([[side*45,81],[side*49,108]],ink,1);}
+ellipse(0,0,23,32,'#c4b18b');path([[-21,-9],[-26,-27],[-10,-36],[1,-32],[16,-35],[23,-15]],ink,5);
+path([[-17,-6],[-8,smug?-9:-13]],ink,2);path([[7,smug?-9:-13],[17,-6]],ink,2);
+ellipse(-10,-1,4,smug?2:5,smug?'#efdfb5':'#17130f');ellipse(10,-1,4,smug?2:5,smug?'#efdfb5':'#17130f');path([[0,-2],[-3,11],[3,12]],ink,1);
+if(smug){path([[-10,18],[0,22],[13,15]],ink,2);path([[12,18],[34,22]],'#413122',7);ellipse(35,22,3,3,'#d58c49',null);for(let i=0;i<3;i++)path([[36+i*3,17-i*12],[32+Math.sin(t*2+i)*5,7-i*12],[39,-i*12]],'#d7c29c55',1);roughRect(-25,-85,49,54,'#201b16');roughRect(-25,-46,49,10,'#62523c');ellipse(0,-31,38,6,'#282018');hatch(-23,-83,45,37,7,'#b29b7033');}else{ellipse(0,21,6,8,'#211910');path([[-17,9],[-21,20]],'#766346',1);path([[16,9],[20,25]],'#766346',1);}
+path([[-21,4],[-14,29],[-2,33],[18,21]],'#4a382477',1);ctx.restore();}
+function runner(p,t=clock){ctx.save();ctx.translate(p.x-cam,p.y);if(p.face<0)ctx.scale(-1,1);const phase=t*(Math.abs(p.vx)>20?15:2);const stride=p.grounded?Math.sin(phase)*8:5;path([[-3,27],[-5-stride,40]],ink,5);path([[4,27],[5+stride,40]],ink,5);path([[-3,27],[-5-stride,40]],paper,2);path([[4,27],[5+stride,40]],paper,2);roughRect(-8,9,16,20,'#b3a17e');ellipse(0,1,8,10);path([[-8,-2],[-8,-9],[3,-12],[9,-4]],ink,3);path([[-6,15],[-12+stride,24]],ink,4);path([[6,15],[12-stride,22]],ink,4);ellipse(4,0,1.6,2,ink,null);ctx.restore();}
+const biomes=[{name:'The forest that remembers',sky:'#8e8062',fog:'#524c3b',type:0},{name:'A house with no outside',sky:'#79664e',fog:'#43372b',type:1},{name:'The drowned orchard',sky:'#7b8174',fog:'#384540',type:2},{name:'The cathedral of teeth',sky:'#8f8173',fog:'#51433c',type:3},{name:'Where the snow is ash',sky:'#a39780',fog:'#57524b',type:4}];
+function scenery(camera,distance,t){const b=biomes[Math.floor(distance/500)%biomes.length];ctx.fillStyle=b.sky;ctx.fillRect(0,0,W,H);const dread=clamp(distance/GOAL,0,1);ellipse(780-camera*.025%1100,91,49,49,'#c4b594',null);ctx.fillStyle=b.fog;ctx.fillRect(0,340,W,200);
+for(let layer=0;layer<2;layer++){const speed=layer?.36:.15,spacing=layer?170:240,start=Math.floor(camera*speed/spacing);for(let i=start-1;i<start+8;i++){const x=i*spacing-camera*speed,rand=seedRandom(i*113+layer*817+Math.floor(distance/500)*37),y=150+rand()*80;ctx.globalAlpha=layer?.7:.32;
+if(b.type===0||b.type===2){path([[x,470],[x+12,y],[x+4,y-70]],b.fog,layer?15:10);for(let k=0;k<7;k++){const yy=y+k*28;path([[x+9,yy+45],[x+(k%2?-47:55),yy-6],[x+(k%2?-65:70),yy-40]],b.fog,5);}if(b.type===2){path([[x+48,y+30],[x+48,y+120]],ink,1);ellipse(x+48,y+123,9,13,'#8e735c');}}
+else if(b.type===1){roughRect(x,80,130,310,'#473b2d');roughRect(x+19,108,90,130,'#a28d69');path([[x+65,108],[x+65,238]],ink,5);hatch(x,255,130,130,14);path([[x,80],[x+52,34],[x+130,80]],ink,4);}
+else if(b.type===3){path([[x,440],[x+22,190],[x+50,100],[x+73,190],[x+96,440]],b.fog,14);path([[x+31,310],[x+48,199],[x+64,310]],ink,4);}
+else{path([[x-60,414],[x+33,174],[x+120,414]],b.fog,7);for(let k=0;k<7;k++)path([[x-30+k*15,404],[x+30,180+k*12]],b.fog,2);}}
+}ctx.globalAlpha=1;ctx.fillStyle=`rgba(13,10,9,${dread*.3})`;ctx.fillRect(0,0,W,H);
+for(let i=0;i<22;i++){const x=((i*137-camera*.2+Math.sin(i)*90)%1000+1000)%1000;const y=(i*41+t*(b.type===4?20:4))%530;path([[x,y],[x+2,y+3]],'#d6c4a366',1);}return b;}
+const riddles=[{q:'I repeat your words, but never understand them. What am I?',clue:'Listen to the empty hall after you call.',a:['An echo','A promise','A witness'],correct:0},{q:'The more of me you take, the more you leave behind. What am I?',clue:'Look at the trail beneath your feet.',a:['Breaths','Footsteps','Memories'],correct:1},{q:'I follow you in light and disappear in darkness. What am I?',clue:'I have your shape, but never your weight.',a:['Your guilt','Your reflection','Your shadow'],correct:2},{q:'I hold a face, but never a thought. Break me and that face multiplies.',clue:'You entered through me.',a:['A mirror','A skull','A photograph'],correct:0},{q:'I have hands but cannot touch you. I consume your hours.',clue:'My hands circle the same twelve numbers.',a:['A stranger','A clock','A tree'],correct:1}];
+const tuning={easy:{speed:250,hazard:.43,grace:2.4},normal:{speed:270,hazard:.64,grace:1.7},hard:{speed:290,hazard:.82,grace:1.2}};
+function beginRun(withScene=true){const seed=newSeed();run={seed,rng:seedRandom(seed),level:options.difficulty,tune:tuning[options.difficulty],platforms:[],entities:[],objects:[],gates:[],nextX:0,lastY:425,chunk:0,maxX:90,time:0,leftLimit:0,player:{x:90,y:385,vx:0,vy:0,face:1,grounded:true,coyote:.1,jumps:2,dash:0,dashCD:0,grace:0}};cam=0;activeGate=null;generate(2400);sceneTime=0;setState(withScene?'intro':'play');unlockAudio();}
+// Every chunk has a wide landing. Gaps <= 78px and rises <= 34px are
+// below the single-jump envelope, even without dash or double jump.
+function generate(until){const r=run.rng;while(run.nextX<until){const n=run.chunk++,gateChunk=n>0&&n%9===0,w=gateChunk?640:360+r()*180,gap=n<2||gateChunk?0:35+r()*43;const y=n<2?425:clamp(run.lastY+(r()-.5)*68,345,450);const x=run.nextX+gap;run.platforms.push({x,y,w});
+if(n>1){run.objects.push({x:x+w*.24,y,kind:Math.floor(r()*4),salt:r()});if(gateChunk){const qi=Math.floor(r()*riddles.length);run.gates.push({x:x+w*.68,y,solved:false,qi});}else if(r()<run.tune.hazard){run.entities.push({x:x+w*.6,base:x+w*.6,y,type:r()<.5?0:1,harmless:r()<.22,phase:r()*6.28,range:Math.min(55,w*.13)});}}
+run.lastY=y;run.nextX=x+w;}}
+function die(reason){if(state!=='play'&&state!=='riddle')return;best=Math.max(best,Math.floor(run.maxX/METER));save();$('deathText').textContent=reason;$('record').textContent=`${Math.floor(run.maxX/METER).toLocaleString()} m reached · best ${best.toLocaleString()} m · seed ${run.seed}`;tone(63,.8,'sawtooth',.3);setState('dead');}
+function ask(gate){activeGate=gate;const r=riddles[gate.qi];$('question').textContent=r.q;$('clue').textContent=run.level==='easy'?r.clue:'Its answer is literal. Fear makes it complicated.';$('answers').replaceChildren();r.a.forEach((answer,i)=>{const button=document.createElement('button');button.textContent=answer;button.onclick=()=>{if(state!=='riddle')return;if(i===r.correct){gate.solved=true;run.player.grace=1;setState('play');tone(280,.3);notify('The keeper steps aside.');}else die('You gave the room the wrong name.');};$('answers').append(button);});setState('riddle');}
+function update(dt){if(state!=='play'||!run)return;const p=run.player;run.time+=dt;jumpQueue=Math.max(0,jumpQueue-dt);dashQueue=Math.max(0,dashQueue-dt);p.grace=Math.max(0,p.grace-dt);p.dashCD=Math.max(0,p.dashCD-dt);p.coyote=p.grounded?.1:Math.max(0,p.coyote-dt);
+let direction=(keys.has('ArrowRight')||keys.has('KeyD')?1:0)-(keys.has('ArrowLeft')||keys.has('KeyA')?1:0);if(direction)p.face=direction;
+if(jumpQueue>0&&(p.coyote>0||p.jumps>0)){p.dash=0;p.vy=-510;p.jumps=p.coyote>0?1:p.jumps-1;p.grounded=false;p.coyote=0;jumpQueue=0;tone(170,.09,'triangle',.15);}
+if(dashQueue>0&&p.dashCD<=0){p.dash=.16;p.dashCD=.85;dashQueue=0;tone(80,.18,'triangle',.2);}
+if(p.dash>0){p.dash-=dt;p.vx=p.face*680;p.vy=0;}else{p.vx=lerp(p.vx,direction*run.tune.speed,Math.min(1,dt*(p.grounded?19:10)));p.vy=Math.min(760,p.vy+1450*dt);if(!keys.has('Space')&&!keys.has('KeyW')&&!keys.has('ArrowUp')&&p.vy<-200)p.vy+=1800*dt;}
+const oldFeet=p.y+40;p.x=Math.max(run.leftLimit+12,p.x+p.vx*dt);p.y+=p.vy*dt;p.grounded=false;
+for(const platform of run.platforms){if(p.vy>=0&&oldFeet<=platform.y+2&&p.y+40>=platform.y&&p.x+7>platform.x&&p.x-7<platform.x+platform.w){p.y=platform.y-40;p.vy=0;p.grounded=true;p.jumps=2;break;}}
+if(p.y>650){die('The space beneath the floor was hungry.');return;}
+run.maxX=Math.max(run.maxX,p.x);if(run.maxX/METER>=GOAL){best=GOAL;save();sceneTime=0;setState('ending');tone(43,1.5,'sawtooth',.25);return;}
+for(const g of run.gates){if(!g.solved&&p.x>=g.x-85){p.x=Math.min(p.x,g.x-70);p.vx=0;ask(g);return;}}
+for(const e of run.entities){e.x=e.base+Math.sin(run.time*(e.type?1.5:1.1)+e.phase)*e.range;const height=e.type?36:57;if(!e.harmless&&run.time>run.tune.grace&&p.grace<=0&&Math.abs(p.x-e.x)<(e.type?43:33)&&p.y+38>e.y-height&&p.y<e.y+2){die(e.type?'Too many hands. Nowhere to hold on.':'All three mouths remembered your name.');return;}}
+cam=Math.max(0,p.x-280);generate(cam+W+1000);const cutoff=cam-1000;run.platforms=run.platforms.filter(v=>v.x+v.w>=cutoff);run.entities=run.entities.filter(v=>v.base>=cutoff);run.objects=run.objects.filter(v=>v.x>=cutoff);run.gates=run.gates.filter(v=>v.x>=cutoff);run.leftLimit=Math.max(0,run.platforms[0].x);
+}
+function object(o,t){const x=o.x-cam,y=o.y;ctx.save();if(o.kind===0){roughRect(x-18,y-72,36,72,'#b6b4a0');path([[x-18,y-48],[x+18,y-48]],ink);path([[x+11,y-65],[x+11,y-56]],ink,3);path([[x+11,y-40],[x+11,y-23]],ink,3);hatch(x-17,y-71,34,69,13);}
+else if(o.kind===1){path([[x-22,y],[x+20,y-8]],ink,6);path([[x+23,y],[x-20,y-8]],ink,6);for(let i=0;i<4;i++){const h=20+Math.sin(t*8+i)*8;path([[x-14+i*8,y-4],[x-9+i*7,y-h],[x-2+i*6,y-5]],i%2?'#baa16b':'#8f6336',4);}}
+else if(o.kind===2){path([[x-17,y],[x-17,y-34],[x+17,y-34],[x+17,y]],ink,3);roughRect(x-20,y-45,40,13,'#655440');path([[x-18,y-45],[x-18,y-81],[x+16,y-77],[x+18,y-45]],ink,3);}
+else{path([[x,y],[x,y-65]],ink,3);ellipse(x,y-85,19,26,'#bdb39a');hatch(x-16,y-106,32,43,8);ellipse(x-5,y-87,2,2,ink);ellipse(x+5,y-87,2,2,ink);path([[x-6,y-73],[x+6,y-73]],ink);}
+ctx.restore();}
+function monster(e,t){const x=e.x-cam,y=e.y,col=e.harmless?'#7c715a':'#282019';if(e.type===0){ellipse(x,y-22,28,15,col);for(let i=0;i<4;i++){const xx=x-20+i*13;path([[xx,y-20],[xx+Math.sin(t*7+i)*5,y]],col,5);}for(let i=0;i<3;i++){path([[x+12-i*12,y-24],[x+28-i*13,y-43-i%2*9]],col,7);ellipse(x+26-i*14,y-43-i%2*9,11,10,col);path([[x+19-i*14,y-49-i%2*9],[x+18-i*14,y-59-i%2*9],[x+27-i*14,y-51-i%2*9]],col,3);ellipse(x+30-i*14,y-45-i%2*9,2,2,'#ded3b8',null);}}
+else{ellipse(x,y-16,28,12,col);for(let i=0;i<9;i++){const side=i%2?1:-1,xx=x-23+i*6;path([[xx,y-18],[xx+side*14,y-33-Math.sin(t*5+i)*6],[xx+side*23,y-3]],col,3);path([[xx+side*23,y-3],[xx+side*29,y-1]],col,2);}ellipse(x+30,y-19,9,10,'#b7a27e');ellipse(x+34,y-20,2,2,ink,null);}
+if(e.harmless){path([[x-11,y-63],[x,y-67],[x+11,y-63]],'#c7b993',1);}}
+function drawGame(){const t=run.time,p=run.player,d=Math.floor(run.maxX/METER),b=scenery(cam,d,t);for(const o of run.objects)if(o.x>cam-70&&o.x<cam+W+70)object(o,t);
+for(const v of run.platforms){const x=v.x-cam;if(x>W||x+v.w<0)continue;roughRect(x,v.y,v.w,H-v.y+10,'#756447');hatch(Math.max(-5,x),v.y,Math.min(W+10,x+v.w)-Math.max(-5,x),H-v.y,13);path([[x,v.y+4],[x+v.w,v.y+3]],'#dac7a1',2);for(let i=10;i<v.w;i+=31)path([[x+i,v.y+4],[x+i-5,v.y-8],[x+i+3,v.y-2]],ink,1);}
+for(const g of run.gates){const x=g.x-cam;if(x<-100||x>W+100)continue;ctx.globalAlpha=g.solved?.22:1;path([[x-30,g.y],[x-22,g.y-103],[x,g.y-126],[x+22,g.y-103],[x+30,g.y]],ink,7);ellipse(x,g.y-87,18,27,'#b3a280');path([[x-11,g.y-95],[x-3,g.y-87],[x-11,g.y-83]],ink);path([[x+11,g.y-95],[x+3,g.y-87],[x+11,g.y-83]],ink);path([[x-9,g.y-70],[x+9,g.y-70]],ink,2);ctx.globalAlpha=1;}
+for(const e of run.entities)if(e.x>cam-100&&e.x<cam+W+100)monster(e,t);
+if(p.dash>0){ctx.globalAlpha=.24;for(let i=1;i<=3;i++)runner({...p,x:p.x-p.face*i*19},t);ctx.globalAlpha=1;}
+runner(p,t);$('distance').textContent=`${d.toLocaleString()} / 50,000 m`;$('biome').textContent=b.name;
+if(run.time<10){text('A / D to move · Space to jump twice · Shift to dash',480,120,16);text('No weapon. No rescue. Keep moving.',480,145,14);}
+// A small hand-drawn arc signals dash recovery, rather than digital HUD chrome.
+ctx.strokeStyle='#ded0b0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x-cam,p.y-21,6,-Math.PI/2,-Math.PI/2+Math.PI*2*(1-clamp(p.dashCD/.85,0,1)));ctx.stroke();}
+function drawMenu(){ctx.fillStyle='#958263';ctx.fillRect(0,0,W,H);hatch(0,0,W,H,27,'#24190e22');const glow=ctx.createRadialGradient(715,265,35,690,280,460);glow.addColorStop(0,'#e3cd9c33');glow.addColorStop(1,'#100d0bf2');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+roughRect(577,100,271,326,'#554834');roughRect(589,112,247,302,'#9a8868');hatch(591,114,244,297,18,'#2b211044');ctx.save();ctx.beginPath();ctx.rect(591,114,244,299);ctx.clip();
+const smug=Math.floor(clock/2)%2===1,phase=clock%2,glitch=!options.reduced&&phase<.17,jitter=glitch?Math.sin(clock*149)*7:0;
+man(711+jitter,257,1.48,smug,glitch?Math.sin(clock*133)*.045:0,options.reduced?0:clock);
+if(glitch){ctx.globalAlpha=.25;man(718-jitter,259,1.48,!smug,.025,clock);ctx.globalAlpha=1;const rr=seedRandom(Math.floor(clock*24));for(let i=0;i<24;i++){const y=120+rr()*280;path([[588+rr()*45,y],[835,y+rr()*22-11]],i%2?ink:'#d1c2a0',1+rr()*2);}}
+ctx.restore();for(let i=0;i<12;i++)path([[579+i*23,98],[590+i*20,112]],ink,1);
+text('ONE FACE. TWO WAYS TO LIE.',714,456,13,'#bca982');path([[569,478],[850,476]],'#938164',1);text(best?`The glass remembers ${best.toLocaleString()} metres.`:'You have been here before.',713,501,12,'#9c896a');}
+function room(t,broken=false){ctx.fillStyle='#645640';ctx.fillRect(0,0,W,H);hatch(0,0,W,390,35,'#1a130d44');ctx.fillStyle='#372d22';ctx.fillRect(0,395,W,145);for(let i=-4;i<12;i++)path([[480,320],[i*180,540]],'#9c87604d',2);for(let y=412;y<540;y+=27)path([[0,y],[W,y]],'#a88f6055',1);
+roughRect(335,48,287,349,'#30271c');roughRect(349,62,259,322,'#a39a83');hatch(354,65,249,316,29,'#29261e44');path([[339,50],[347,383],[615,390]],'#c3ad7b',2);
+if(broken){const rr=seedRandom(515);for(let i=0;i<13;i++){const ex=351+rr()*252,ey=66+rr()*310;path([[474,219],[lerp(474,ex,.56)+rr()*15,lerp(219,ey,.56)],[ex,ey]],ink,i%3?1:3);}for(let i=0;i<15;i++){const x=332+rr()*310,y=427+rr()*93;path([[x,y],[x+rr()*25,y-rr()*12],[x+rr()*20,y+4],[x,y]],'#b1b0a2',1);}}
+// A separate window is visible beside the mirror.
+roughRect(735,95,139,189,'#26271f');path([[806,95],[806,284]],'#86765a',7);path([[735,191],[874,191]],'#86765a',7);ellipse(845,130,13,13,'#b4a889',null);}
+let lastCaption='';
+function caption(value){if(lastCaption!==value){$('caption').textContent=value;lastCaption=value;}$('caption').hidden=!value;}
+function fade(alpha,color='#080706'){ctx.globalAlpha=clamp(alpha,0,1);ctx.fillStyle=color;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;}
+function intro(){const t=sceneTime;room(t,t>=8);let line='';
+if(t<8){ctx.save();ctx.beginPath();ctx.rect(350,63,257,320);ctx.clip();man(477,211,1.12,t>=5,0,t);ctx.restore();man(254,297,1.3,false,.06,t);path([[263,436],[245,500]],ink,12);path([[292,436],[315,500]],ink,12);if(t>=5&&t<5.2&&!options.reduced)fade((5.2-t)*4,'#fff9e8');if(t>=6)line='“Leave me alone!”';}
+else if(t<11){const k=clamp((t-8)/1.6,0,1);man(477,211,1.12,true,0,t);path([[514,264],[lerp(520,282,k),lerp(276,342,k)]],ink,22);ellipse(lerp(520,282,k),lerp(276,342,k),15,12,paper);man(lerp(254,166,k),lerp(297,441,k),1.3,false,-k*1.35,t);line='“Leave me alone!”';}
+else if(t<15){const k=clamp((t-11)/3,0,1);ctx.save();ctx.translate(0,30);man(lerp(480,803,k),lerp(205,200,k)-Math.sin(k*Math.PI)*90,1.15,true,Math.sin(k*Math.PI)*.45,t);path([[lerp(480,803,k)-15,lerp(328,324,k)],[lerp(450,786,k),lerp(363,255,k)]],ink,9);ctx.restore();path([[190,526],[257,489],[286,510]],paper,12);}
+else if(t<20){man(700,194,1.9,true,-.05,t);ellipse(681,192,5,3,'#e8e1c8',null);ellipse(719,192,5,3,'#e8e1c8',null);line='“This is the hell you created for yourself.”';path([[188,535],[250,491],[286,514]],paper,12);}
+else if(t<24){const k=clamp((t-20)/2,0,1);man(lerp(700,487,k),lerp(194,246,k),lerp(1.9,3.2,k),true,.08,t);line=t<21.3?'A laugh, without warmth.':'“Time to Run.”';}
+else if(t<25){fade(1);}
+else if(t<27){line='He is gone. The mirror is not.';path([[190,lerp(535,580,(t-25)/2)],[260,lerp(490,570,(t-25)/2)]],paper,12);}
+else{const k=clamp((t-27)/3,0,1);ctx.save();ctx.translate(480,240);ctx.scale(1+k*4,1+k*4);ctx.translate(-480,-240);roughRect(335,48,287,349,'#30271c');roughRect(350,63,257,320,'#181b15');hatch(350,63,257,320,19,'#c3b18d22');ctx.restore();fade(clamp((k-.55)*2.3,0,1));}
+if(t<3)fade(1-t/3);caption(line);if(t>=30){lastCaption='';setState('play');notify('Reach 50,000 metres. Nothing here can be killed.');}}
+function ending(){const t=sceneTime;scenery(0,GOAL,0);ctx.fillStyle='#342b21';ctx.fillRect(0,430,W,110);hatch(0,430,W,110,12);man(595,258,1.4,true,-.06,options.reduced?0:t);const k=clamp((t-4)/1.2,0,1);man(lerp(366,307,k),lerp(300,412,k),1.2,false,-k*1.4,t);const bx=lerp(535,347,k);path([[660,337],[bx,349]],'#302214',10);path([[bx+60,348],[bx+37,322],[bx+25,314]],'#302214',4);path([[bx+115,344],[bx+95,367]],'#302214',3);if(t>5){path([[342,358],[344,401],[326,425]],'#512d22',3);}
+let line=t<3?'50,000 metres. The glass has no edge.':t<6?'“You thought distance could change the ending.”':t<9?'A branch from a tree you remember.':'';if(t>8)fade((t-8)/3);caption(line);if(t>12){setState('menu');notify('The snow settles. The glass remembers.');}}
+function paint(){ctx.setTransform(options.resolution,0,0,options.resolution,0,0);ctx.clearRect(0,0,W,H);ctx.save();if(state==='intro')intro();else if(state==='ending')ending();else if(run&&['play','paused','riddle','dead'].includes(state))drawGame();else drawMenu();ctx.restore();ctx.globalAlpha=.75;ctx.drawImage(grain,0,0);ctx.globalAlpha=1;const vignette=ctx.createRadialGradient(480,265,150,480,265,550);vignette.addColorStop(0,'#0000');vignette.addColorStop(1,'#0b0807aa');ctx.fillStyle=vignette;ctx.fillRect(0,0,W,H);}
+function advanceScene(delta){const old=sceneTime;sceneTime+=delta;const cues=state==='intro'?[[5,600,.25],[8,1200,.45],[20.4,95,.3],[20.9,80,.3],[21.4,65,.4],[24,35,.7]]:[[4,130,.6],[8,35,1.5]];for(const [at,hz,duration] of cues)if(old<at&&sceneTime>=at)tone(hz,duration,'triangle',.23);}
+function frame(now){const delta=previous?Math.min((now-previous)/1000,.05):0;previous=now;if(!document.hidden){clock+=delta;if(state==='play'){acc+=delta;while(acc>=STEP){acc-=STEP;update(STEP);if(state!=='play'){acc=0;break;}}}else if(state==='intro'||state==='ending')advanceScene(delta);paint();if(announcementUntil&&clock>announcementUntil){$('status').textContent='';announcementUntil=0;}}requestAnimationFrame(frame);}
+function openSettings(origin){settingsOrigin=origin;for(const id of ['resolution','difficulty'])$(id).value=String(options[id]);$('mute').checked=options.mute;$('reduced').checked=options.reduced;setState('settings');}
+$('run').onclick=()=>beginRun(true);$('breathe').onclick=()=>openSettings('menu');$('pauseSettings').onclick=()=>openSettings('paused');$('settingsBack').onclick=()=>setState(settingsOrigin);
+$('resolution').onchange=e=>{options.resolution=Number(e.target.value);resize();save();};$('difficulty').onchange=e=>{options.difficulty=e.target.value;save();};$('mute').onchange=e=>{options.mute=e.target.checked;if(master)master.gain.value=options.mute?0:.16;if(!options.mute)unlockAudio();save();};$('reduced').onchange=e=>{options.reduced=e.target.checked;save();};
+$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if($('stage').requestFullscreen)await $('stage').requestFullscreen();else notify('Fullscreen is not supported here. Use your browser’s fullscreen control.');}catch{notify('Fullscreen was unavailable. Try your browser’s fullscreen control.');}};
+function pause(){if(state==='play')setState('paused');}
+$('pauseButton').onclick=pause;$('resume').onclick=()=>{setState('play');unlockAudio();};$('quit').onclick=()=>setState('menu');$('deadMenu').onclick=()=>setState('menu');$('retry').onclick=()=>beginRun(false);$('return').onclick=()=>setState('menu');
+$('exit').onclick=()=>{setState('exited');try{window.close();}catch{}if(master)master.gain.value=0;};$('return').addEventListener('click',()=>{if(master)master.gain.value=options.mute?0:.16;});
+$('skip').onclick=()=>{if(state==='intro'){setState('play');notify('A / D — move · Space — double jump · Shift — dash');}else if(state==='ending')setState('menu');};
+const gameKeys=new Set(['ArrowLeft','ArrowRight','ArrowUp','KeyA','KeyD','KeyW','Space','ShiftLeft','ShiftRight','KeyX']);
+function press(code,source){held.set(source,code);keys.add(code);if(['Space','KeyW','ArrowUp'].includes(code))jumpQueue=.14;if(['ShiftLeft','ShiftRight','KeyX'].includes(code))dashQueue=.14;}
+function release(source){const code=held.get(source);held.delete(source);if(![...held.values()].includes(code))keys.delete(code);}
+window.addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();if(state==='play')pause();else if(state==='paused'){setState('play');unlockAudio();}else if(state==='settings')setState(settingsOrigin);return;}if(state!=='play'||!gameKeys.has(e.code))return;e.preventDefault();if(!e.repeat)press(e.code,'keyboard:'+e.code);});
+window.addEventListener('keyup',e=>release('keyboard:'+e.code));
+for(const button of document.querySelectorAll('[data-key]')){button.addEventListener('pointerdown',e=>{if(state!=='play')return;e.preventDefault();button.setPointerCapture(e.pointerId);press(button.dataset.key,'pointer:'+e.pointerId);unlockAudio();});for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,e=>release('pointer:'+e.pointerId));}
+window.addEventListener('blur',()=>{clearInput();pause();});document.addEventListener('visibilitychange',()=>{clearInput();previous=0;if(document.hidden){pause();if(audio)audio.suspend().catch(()=>{});}else if(audio&&!options.mute)audio.resume().catch(()=>{});});
+// Enter/Space on focused controls stays native; gameplay alone consumes movement keys.
+setState('menu');requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
